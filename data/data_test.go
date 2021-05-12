@@ -4,12 +4,18 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/adrdev10/movie-deliver/util"
 )
 
 func TestData(t *testing.T) {
 	movieData := MovieData{}
-
-	mc, err := movieData.FetchMovies("http://www.omdbapi.com/?apikey=b16cda27&s=action")
+	api, err := util.GetAPIKey()
+	if err != nil {
+		t.Error("Failed getting API key")
+	}
+	url := "http://www.omdbapi.com/?apikey=" + api + "&" + "s=action"
+	mc, err := movieData.FetchMovies(url)
 	if err != nil {
 		t.Errorf("FetchMovies failed. Expected %v, got %v. Culprit: %v", "Data", mc, err)
 	} else {
@@ -20,9 +26,9 @@ func TestData(t *testing.T) {
 
 func TestPopFunc(t *testing.T) {
 	movieData := MovieData{}
-	api, ok := os.LookupEnv("MOVIE_API")
-	if !ok {
-		t.Error("Could not get env key")
+	api, err := util.GetAPIKey()
+	if err != nil {
+		t.Error("Failed getting API key")
 	}
 	url := "http://www.omdbapi.com/?apikey=" + api + "&" + "s=action"
 	mc, err := movieData.FetchMovies(url)
@@ -48,16 +54,18 @@ func TestMovieInfo(t *testing.T) {
 	if err != nil {
 		t.Errorf("FetchMovies failed. Expected %v, got %v. Culprit: %v", "Data", mc, err)
 	} else {
-		sm := mc.PopMovie()
-		idSm, err := sm.GetImdbID()
-		if err != nil {
-			t.Errorf("GetImdbID failed. Expected %v, got %v", "#1234", err)
-		} else {
-			movieInfo, err := GetMovieInfo(idSm)
+		for len(mc.Movies) != 0 {
+			sm := mc.PopMovie()
+			idSm, err := sm.GetImdbID()
 			if err != nil {
-				t.Errorf("GetMovieInfo failed. %v", err)
+				t.Errorf("GetImdbID failed. Expected %v, got %v", "#1234", err)
+			} else {
+				movieInfo, err := GetMovieInfo(idSm)
+				if err != nil {
+					t.Errorf("GetMovieInfo failed. %v", err)
+				}
+				t.Logf("Passed. Movie info obtained: %v", movieInfo)
 			}
-			t.Logf("Passed. Movie info obtained: %v", movieInfo)
 		}
 	}
 }
