@@ -20,28 +20,21 @@ type MovieData struct {
 	Movies []*movie.Movie `json:"Search"`
 }
 
-func (MovieData) FetchMovies(url string) (*MovieData, error) {
+func (md *MovieData) FetchMovies(url string) error {
 
-	mc, client := &MovieData{}, http.Client{}
+	client := http.Client{}
 	resp, err := client.Get(url)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(mc)
+	err = json.NewDecoder(resp.Body).Decode(md)
 	if err != nil {
-		return nil, errors.New("error: could not decode data into the structure")
+		return errors.New("error: could not decode data into the structure")
 	}
-
-	mcJson, err := json.Marshal(mc)
-	if err != nil {
-		return nil, errors.New("error: could not decode the body into the structure")
-	}
-	fmt.Println(string(mcJson))
-
-	return mc, nil
+	return nil
 }
 
 //PopMovie removes the last movie in the array
