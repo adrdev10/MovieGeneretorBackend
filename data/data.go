@@ -3,12 +3,11 @@ package data
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"os"
 
 	http "net/http"
 
 	"github.com/adrdev10/movie-deliver/movie"
+	"github.com/adrdev10/movie-deliver/util"
 )
 
 type MovieDataInterface interface {
@@ -20,16 +19,20 @@ type MovieData struct {
 	Movies []*movie.Movie `json:"Search"`
 }
 
-func (md *MovieData) FetchMovies(url string) error {
+func (md *MovieData) FetchMovies(genre string) error {
 
 	client := http.Client{}
+	api, err := util.GetAPIKey()
+	if err != nil {
+		return errors.New("could get API key")
+	}
+	url := "http://www.omdbapi.com/?apikey=" + api + "&" + "s=" + genre
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
 	}
 
 	defer resp.Body.Close()
-
 	err = json.NewDecoder(resp.Body).Decode(md)
 	if err != nil {
 		return errors.New("error: could not decode data into the structure")
@@ -57,7 +60,7 @@ func (mo *MovieData) GetAllMovieNames() ([]string, error) {
 	return moviesNames, nil
 }
 
-func (mo *MovieData) filterOnlyMovies() *MovieData {
+func (mo *MovieData) FilterOnlyMovies() *MovieData {
 	for i, movie := range mo.Movies {
 		//type can only be series or movie
 		if movie.Type == "series" {
@@ -69,9 +72,9 @@ func (mo *MovieData) filterOnlyMovies() *MovieData {
 
 func GetMovieInfo(movieID string) (*movie.MovieInfo, error) {
 	client := http.Client{}
-	api, ok := os.LookupEnv("MOVIE_API")
-	if !ok {
-		return nil, errors.New("ENV key not found")
+	api, err := util.GetAPIKey()
+	if err != nil {
+		return nil, errors.New("could not get API key")
 	}
 	url := "http://www.omdbapi.com/?apikey=" + api + "&" + "i=" + movieID
 	resp, err := client.Get(url)
@@ -87,13 +90,6 @@ func GetMovieInfo(movieID string) (*movie.MovieInfo, error) {
 	if err != nil {
 		return nil, errors.New("error: could not decode data into the structure")
 	}
-
-	mcJson, err := json.Marshal(mc)
-	if err != nil {
-		return nil, errors.New("error: could not decode the body into the structure")
-	}
-	fmt.Println(string(mcJson))
-
 	return mc, nil
 
 }

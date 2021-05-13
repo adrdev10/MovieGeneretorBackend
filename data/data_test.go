@@ -15,11 +15,11 @@ func TestData(t *testing.T) {
 		t.Error("Failed getting API key")
 	}
 	url := "http://www.omdbapi.com/?apikey=" + api + "&" + "s=action"
-	mc, err := movieData.FetchMovies(url)
+	err = movieData.FetchMovies(url)
 	if err != nil {
-		t.Errorf("FetchMovies failed. Expected %v, got %v. Culprit: %v", "Data", mc, err)
+		t.Errorf("FetchMovies failed. Expected %v, got %v. Culprit: %v", "Data", movieData, err)
 	} else {
-		t.Logf("FetchMovies success. Expected %v, got %v. Culprit: %v", "Data", mc, err)
+		t.Logf("FetchMovies success. Expected %v, got %v. Culprit: %v", "Data", movieData, err)
 	}
 
 }
@@ -31,13 +31,13 @@ func TestPopFunc(t *testing.T) {
 		t.Error("Failed getting API key")
 	}
 	url := "http://www.omdbapi.com/?apikey=" + api + "&" + "s=action"
-	mc, err := movieData.FetchMovies(url)
+	err = movieData.FetchMovies(url)
 	if err != nil {
-		t.Errorf("FetchMovies failed. Expected %v, got %v. Culprit: %v", "Data", mc, err)
+		t.Errorf("FetchMovies failed. Expected %v, got %v. Culprit: %v", "Data", movieData, err)
 	} else {
-		fmt.Printf("Length: %v\n", len(mc.Movies))
-		sm := mc.PopMovie()
-		fmt.Printf("Poppped movie: %v, movie list length %v\n", sm, len(mc.Movies))
+		fmt.Printf("Length: %v\n", len(movieData.Movies))
+		sm := movieData.PopMovie()
+		fmt.Printf("Poppped movie: %v, movie list length %v\n", sm, len(movieData.Movies))
 		t.Logf("Popped movie was %v", sm)
 	}
 
@@ -50,12 +50,12 @@ func TestMovieInfo(t *testing.T) {
 		t.Error("Could not get env key")
 	}
 	url := "http://www.omdbapi.com/?apikey=" + api + "&" + "s=action"
-	mc, err := movieData.FetchMovies(url)
+	err := movieData.FetchMovies(url)
 	if err != nil {
-		t.Errorf("FetchMovies failed. Expected %v, got %v. Culprit: %v", "Data", mc, err)
+		t.Errorf("FetchMovies failed. Expected %v, got %v. Culprit: %v", "Data", movieData, err)
 	} else {
-		for len(mc.Movies) != 0 {
-			sm := mc.PopMovie()
+		for len(movieData.Movies) != 0 {
+			sm := movieData.PopMovie()
 			idSm, err := sm.GetImdbID()
 			if err != nil {
 				t.Errorf("GetImdbID failed. Expected %v, got %v", "#1234", err)
